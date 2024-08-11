@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Transaction, Account, Category
 from .forms import TransactionForm, AccountForm, CategoryForm
+from django.db.models import Sum
 
 def dashboard(request):
     # transactions = Transaction.objects.all()
@@ -49,6 +50,21 @@ def dashboard(request):
     categories = Category.objects.all()
     total_balance = sum(account.balance for account in accounts)
 
+    # Calculate Financial Metrics
+    total_income = transactions.filter(type='income').aggregate(Sum('amount'))['amount__sum'] or 0
+    total_expenses = transactions.filter(type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
+ 
+
+    cash_flow = total_income - total_expenses
+    
+    # Assume credit transactions are marked under a specific category, e.g., 'Credit'
+    total_credit = transactions.filter(category__name='Credit').aggregate(Sum('amount'))['amount__sum'] or 0
+    credit_percentage = (total_credit / total_income * 100) if total_income > 0 else 0
+    
+    # Assume debt is also under a specific category, e.g., 'Debt'
+    total_debt = transactions.filter(category__name='Debt').aggregate(Sum('amount'))['amount__sum'] or 0
+    debt_percentage = (total_debt / total_income * 100) if total_income > 0 else 0
+
     context = {
         'transactions': transactions,
         'accounts': accounts,
@@ -57,5 +73,10 @@ def dashboard(request):
         'transaction_form': transaction_form,
         'account_form': account_form,
         'category_form': category_form,
+        'total_income': total_income,
+        'total_expenses': total_expenses,
+        'cash_flow': cash_flow,
+        'credit_percentage': 0,
+        'debt_percentage': 0,
     }
     return render(request, 'finance/dashboard.html', context)

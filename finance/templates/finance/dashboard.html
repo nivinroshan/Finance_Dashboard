@@ -8,6 +8,15 @@
     <title>Finance Dashboard</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+{% comment %} {% for transaction in transactions %}
+    <p>{{ transaction.description }}: {{ transaction.amount }} {{ transaction.type }}</p>
+{% endfor %}
+
+<p>Total Income: {{ total_income }}</p>
+<p>Total Expenses: {{total_expenses}}</p> {% endcomment %}
+
 </head>
 <body class="container">
     <div class="row mt-5">
@@ -72,7 +81,50 @@
             </ul>
         </div>
     </div>
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <h5>Total Income: ${{ total_income }}</h5>
+        </div>
+        <div class="col-md-4">
+            <h5>Total Expenses: ${{ total_expenses }}</h5>
+        </div>
+        <div class="col-md-4">
+            <h5>Cash Flow: ${{ cash_flow }}</h5>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h5>Credit Percentage: {{ credit_percentage }}%</h5>
+        </div>
+        <div class="col-md-6">
+            <h5>Debt Percentage: {{ debt_percentage }}%</h5>
+        </div>
+    </div>
+    
 </body>
+<canvas id="incomeExpenseChart" width="400" height="200"></canvas>
+<script>
+    var ctx = document.getElementById('incomeExpenseChart').getContext('2d');
+    var incomeExpenseChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Income', 'Expenses'],
+            datasets: [{
+                label: 'Amount',
+                data: [{{ total_income }}, {{ total_expenses }}],
+                backgroundColor: ['#4CAF50', '#F44336'],
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
 
 {% comment %} <body>
     <h1>Finance Dashboard</h1>
